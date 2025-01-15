@@ -1,0 +1,178 @@
+basePath: /
+definitions:
+  models.CreateUserRequest:
+    properties:
+      password_hash:
+        type: string
+      user_name:
+        type: string
+    type: object
+  models.CreateUserResponse:
+    properties:
+      user_id:
+        type: integer
+    type: object
+  models.DeleteUserRequest:
+    properties:
+      user_id:
+        type: integer
+    type: object
+  models.GetUserResponse:
+    properties:
+      created_at:
+        type: string
+      user_name:
+        type: string
+    type: object
+  models.UpdateUserRequest:
+    properties:
+      name:
+        type: string
+      password_hash:
+        type: string
+      user_id:
+        type: integer
+    type: object
+host: localhost:8002
+info:
+  contact: {}
+  description: This is a simple user service.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: User Service
+  version: "1.0"
+paths:
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint allows retrieving an existing user's details by providing
+        their user ID as a query parameter. If the user does not exist, it returns
+        a 404 error.
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: '#/definitions/models.GetUserResponse'
+        "400":
+          description: 'error: invalid query parameters or incorrect user ID'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 'error: user not found'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieve user details
+      tags:
+      - user
+  /user/create:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows creating a new user with a username and a
+        hashed password.
+      parameters:
+      - description: User creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreateUserResponse'
+        "400":
+          description: 'error: invalid request or failed to create user'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new user
+      tags:
+      - user
+  /user/delete:
+    delete:
+      consumes:
+      - application/json
+      description: This endpoint allows deleting a user by providing their user ID.
+        The user ID must be greater than 0 for a successful deletion.
+      parameters:
+      - description: User deletion request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'success: true'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'error: invalid request, incorrect user ID or failed to delete
+            user'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an existing user
+      tags:
+      - user
+  /user/update:
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allows updating an existing user's details like name
+        and/or password hash. You must provide the user's ID and the fields to be
+        updated (name and/or password hash).
+      parameters:
+      - description: User update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'success: true'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'error: invalid request, incorrect user ID or failed to update
+            user'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an existing user
+      tags:
+      - user
+schemes:
+- http
+swagger: "2.0"

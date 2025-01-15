@@ -1,0 +1,172 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: illustrv
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: recserv
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - app_network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS:  PLAINTEXT://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    networks:
+      - app_network
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
+  user-service:
+    build:
+      context: .
+      dockerfile: user_service/Dockerfile
+    container_name: user_service
+    depends_on:
+      - postgres
+      - kafka
+    restart: always
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: postgres://illustrv:example@postgres:5432/recserv?sslmode=disable
+      KAFKA_BROKER: kafka:9092
+    networks:
+      - app_network
+
+  analitics-service:
+    build:
+      context: .
+      dockerfile: analitics_service/Dockerfile
+    container_name: analitics_service
+    depends_on:
+      - postgres
+      - kafka
+    restart: always
+    ports:
+      - "8003:8003"
+    environment:
+      DATABASE_URL: postgres://illustrv:example@postgres:5432/recserv?sslmode=disable
+      KAFKA_BROKER: kafka:9092
+    networks:
+      - app_network
+
+  music-service:
+    build:
+      context: .
+      dockerfile: music_service/Dockerfile
+    container_name: music_service
+    depends_on:
+      - postgres
+      - kafka
+      - redis
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgres://illustrv:example@postgres:5432/recserv?sslmode=disable
+      KAFKA_BROKER: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    networks:
+      - app_network
+
+  recommendation-service:
+    build:
+      context: .
+      dockerfile: recommendation_service/Dockerfile
+    container_name: recommendation_service
+    depends_on:
+      - postgres
+      - kafka
+      - redis
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: postgres://illustrv:example@postgres:5432/recserv?sslmode=disable
+      KAFKA_BROKER: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    networks:
+      - app_network
+
+  swagger-ui-us:
+    image: swaggerapi/swagger-ui
+    container_name: swagger_ui_us
+    ports:
+      - "8080:8080"
+    environment:
+      SWAGGER_JSON: /swagger/swagger.yaml  
+      SWAGGER_UI_CORS_ALLOW_ORIGIN: "http://localhost:8080"
+    volumes:
+      - ./user_service/docs/swagger.yaml:/swagger/swagger.yaml  
+    networks:
+      - app_network
+
+  swagger-ui-ms:
+    image: swaggerapi/swagger-ui
+    container_name: swagger_ui_ms
+    ports:
+      - "8070:8080"
+    environment:
+      SWAGGER_JSON: /swagger/swagger.yaml  
+      SWAGGER_UI_CORS_ALLOW_ORIGIN: "http://localhost:8070"
+    volumes:
+      - ./music_service/docs/swagger.yaml:/swagger/swagger.yaml  
+    networks:
+      - app_network
+  
+  swagger-ui-rs:
+    image: swaggerapi/swagger-ui
+    container_name: swagger_ui_rs
+    ports:
+      - "8090:8080"
+    environment:
+      SWAGGER_JSON: /swagger/swagger.yaml  
+      SWAGGER_UI_CORS_ALLOW_ORIGIN: "http://localhost:8090"
+    volumes:
+      - ./recommendation_service/docs/swagger.yaml:/swagger/swagger.yaml  
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge

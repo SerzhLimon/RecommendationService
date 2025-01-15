@@ -1,0 +1,218 @@
+basePath: /
+definitions:
+  models.CreateSongRequest:
+    properties:
+      content:
+        type: string
+      name:
+        type: string
+    type: object
+  models.CreateSongResponse:
+    properties:
+      song_id:
+        type: integer
+    type: object
+  models.DeleteSongRequest:
+    properties:
+      song_id:
+        type: integer
+    type: object
+  models.LikeSongRequest:
+    properties:
+      song_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  models.ListenSongResponse:
+    properties:
+      song:
+        type: string
+    type: object
+  models.UpdateSongRequest:
+    properties:
+      content:
+        type: string
+      name:
+        type: string
+      song_id:
+        type: integer
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: This is a simple music service.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Music Service
+  version: "1.0"
+paths:
+  /song:
+    get:
+      consumes:
+      - application/json
+      description: Simulates listening to a song by providing the user ID and song
+        ID as query parameters. Returns the song's text if found.
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: Song ID
+        in: query
+        name: song_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Song details
+          schema:
+            $ref: '#/definitions/models.ListenSongResponse'
+        "400":
+          description: 'error: invalid query parameters or incorrect IDs'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 'error: song not found'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Listen to a song
+      tags:
+      - music
+  /song/create:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows creating a new song with a songname and a
+        songtext.
+      parameters:
+      - description: Song creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateSongRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreateSongResponse'
+        "400":
+          description: 'error: invalid request or failed to create song'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new song
+      tags:
+      - music
+  /song/delete:
+    delete:
+      consumes:
+      - application/json
+      description: This endpoint allows deleting a song by providing their song ID.
+        The song ID must be greater than 0 for a successful deletion.
+      parameters:
+      - description: Song deletion request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteSongRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'success: true'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'error: invalid request, incorrect song ID or failed to delete
+            song'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an existing song
+      tags:
+      - music
+  /song/like:
+    post:
+      consumes:
+      - application/json
+      description: Allows a user to like a song by providing the user ID and song
+        ID in the request body.
+      parameters:
+      - description: Like Song Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LikeSongRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'success: true'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'error: invalid request or failed to like song'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Like a song
+      tags:
+      - music
+  /song/update:
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint allows updating an existing song's details like name
+        and/or text. You must provide the song's ID and the fields to be updated (name
+        and/or text).
+      parameters:
+      - description: Song update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateSongRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'success: true'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'error: invalid request, incorrect song ID or failed to update
+            song'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an existing song
+      tags:
+      - music
+schemes:
+- http
+swagger: "2.0"

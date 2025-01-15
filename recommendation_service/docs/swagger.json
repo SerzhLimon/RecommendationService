@@ -1,0 +1,129 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a simple recommendation service.",
+        "title": "Recommendation Service",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {},
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8001",
+    "basePath": "/",
+    "paths": {
+        "/chart": {
+            "get": {
+                "description": "This endpoint returns a list of songs currently in the music chart.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recommendations"
+                ],
+                "summary": "Retrieve Music Chart",
+                "responses": {
+                    "200": {
+                        "description": "List of songs in the music chart",
+                        "schema": {
+                            "$ref": "#/definitions/models.GetMusicChartResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "error: fail to get music chart",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/recommended": {
+            "get": {
+                "description": "This endpoint returns a list of recommended songs for a user based on their user ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recommendations"
+                ],
+                "summary": "Get Recommended Songs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of recommended songs",
+                        "schema": {
+                            "$ref": "#/definitions/models.GetRecommendedSongsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "error: invalid query parameters or failed to get recommended songs",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.GetMusicChartResponse": {
+            "type": "object",
+            "properties": {
+                "songs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Song"
+                    }
+                }
+            }
+        },
+        "models.GetRecommendedSongsResponse": {
+            "type": "object",
+            "properties": {
+                "songs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Song"
+                    }
+                }
+            }
+        },
+        "models.Song": {
+            "type": "object",
+            "properties": {
+                "song_id": {
+                    "type": "integer"
+                },
+                "song_name": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

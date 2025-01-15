@@ -1,0 +1,87 @@
+basePath: /
+definitions:
+  models.GetMusicChartResponse:
+    properties:
+      songs:
+        items:
+          $ref: '#/definitions/models.Song'
+        type: array
+    type: object
+  models.GetRecommendedSongsResponse:
+    properties:
+      songs:
+        items:
+          $ref: '#/definitions/models.Song'
+        type: array
+    type: object
+  models.Song:
+    properties:
+      song_id:
+        type: integer
+      song_name:
+        type: string
+    type: object
+host: localhost:8001
+info:
+  contact: {}
+  description: This is a simple recommendation service.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Recommendation Service
+  version: "1.0"
+paths:
+  /chart:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns a list of songs currently in the music chart.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of songs in the music chart
+          schema:
+            $ref: '#/definitions/models.GetMusicChartResponse'
+        "400":
+          description: 'error: fail to get music chart'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieve Music Chart
+      tags:
+      - recommendations
+  /recommended:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint returns a list of recommended songs for a user based
+        on their user ID.
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of recommended songs
+          schema:
+            $ref: '#/definitions/models.GetRecommendedSongsResponse'
+        "400":
+          description: 'error: invalid query parameters or failed to get recommended
+            songs'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Recommended Songs
+      tags:
+      - recommendations
+schemes:
+- http
+swagger: "2.0"
